@@ -244,18 +244,18 @@ void view_autoconfigure(struct sway_view *view) {
 	struct sway_workspace *ws = con->pending.workspace;
 
 	if (container_is_scratchpad_hidden(con) &&
-			con->pending.fullscreen_mode != FULLSCREEN_GLOBAL) {
+			!(con->pending.fullscreen_mode & FULLSCREEN_GLOBAL)) {
 		return;
 	}
 	struct sway_output *output = ws ? ws->output : NULL;
 
-	if (con->pending.fullscreen_mode == FULLSCREEN_WORKSPACE) {
+	if (con->pending.fullscreen_mode & FULLSCREEN_WORKSPACE) {
 		con->pending.content_x = output->lx;
 		con->pending.content_y = output->ly;
 		con->pending.content_width = output->width;
 		con->pending.content_height = output->height;
 		return;
-	} else if (con->pending.fullscreen_mode == FULLSCREEN_GLOBAL) {
+	} else if (con->pending.fullscreen_mode & FULLSCREEN_GLOBAL) {
 		con->pending.content_x = root->x;
 		con->pending.content_y = root->y;
 		con->pending.content_width = root->width;
@@ -629,7 +629,7 @@ static bool should_focus(struct sway_view *view) {
 	struct sway_workspace *prev_ws = seat_get_focused_workspace(seat);
 	struct sway_workspace *map_ws = view->container->pending.workspace;
 
-	if (view->container->pending.fullscreen_mode == FULLSCREEN_GLOBAL) {
+	if (view->container->pending.fullscreen_mode & FULLSCREEN_GLOBAL) {
 		return true;
 	}
 
@@ -1373,11 +1373,11 @@ bool view_is_visible(struct sway_view *view) {
 		return false;
 	}
 	struct sway_workspace *workspace = view->container->pending.workspace;
-	if (!workspace && view->container->pending.fullscreen_mode != FULLSCREEN_GLOBAL) {
+	if (!workspace && !(view->container->pending.fullscreen_mode & FULLSCREEN_GLOBAL)) {
 		bool fs_global_descendant = false;
 		struct sway_container *parent = view->container->pending.parent;
 		while (parent) {
-			if (parent->pending.fullscreen_mode == FULLSCREEN_GLOBAL) {
+			if (parent->pending.fullscreen_mode & FULLSCREEN_GLOBAL) {
 				fs_global_descendant = true;
 			}
 			parent = parent->pending.parent;

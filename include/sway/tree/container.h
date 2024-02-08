@@ -25,9 +25,10 @@ enum sway_container_border {
 };
 
 enum sway_fullscreen_mode {
-	FULLSCREEN_NONE,
-	FULLSCREEN_WORKSPACE,
-	FULLSCREEN_GLOBAL,
+	FULLSCREEN_NONE = 0,
+	FULLSCREEN_WORKSPACE = 1 << 0,
+	FULLSCREEN_GLOBAL = 1 << 1,
+	FULLSCREEN_MAXIMIZED = 1 << 2,
 };
 
 struct sway_root;
