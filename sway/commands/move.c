@@ -275,15 +275,14 @@ static bool container_move_to_next_output(struct sway_container *container,
 		if (!sway_assert(ws, "Expected output to have a workspace")) {
 			return false;
 		}
-		switch (container->pending.fullscreen_mode) {
-		case FULLSCREEN_NONE:
-			container_move_to_workspace_from_direction(container, ws, move_dir);
-			return true;
-		case FULLSCREEN_WORKSPACE:
+		if (container->pending.fullscreen_mode & FULLSCREEN_WORKSPACE) {
 			container_move_to_workspace(container, ws);
 			return true;
-		case FULLSCREEN_GLOBAL:
+		} else if (container->pending.fullscreen_mode & FULLSCREEN_GLOBAL) {
 			return false;
+		} else {
+			container_move_to_workspace_from_direction(container, ws, move_dir);
+			return true;
 		}
 	}
 	return false;
@@ -293,13 +292,10 @@ static bool container_move_to_next_output(struct sway_container *container,
 static bool container_move_in_direction(struct sway_container *container,
 		enum wlr_direction move_dir) {
 	// If moving a fullscreen view, only consider outputs
-	switch (container->pending.fullscreen_mode) {
-	case FULLSCREEN_NONE:
-		break;
-	case FULLSCREEN_WORKSPACE:
+	if (container->pending.fullscreen_mode & FULLSCREEN_WORKSPACE) {
 		return container_move_to_next_output(container,
 				container->pending.workspace->output, move_dir);
-	case FULLSCREEN_GLOBAL:
+	} else if (container->pending.fullscreen_mode & FULLSCREEN_GLOBAL) {
 		return false;
 	}
 
@@ -427,7 +423,7 @@ static struct cmd_results *cmd_move_container(bool no_auto_back_and_forth,
 		container = workspace_wrap_children(workspace);
 	}
 
-	if (container->pending.fullscreen_mode == FULLSCREEN_GLOBAL) {
+	if (container->pending.fullscreen_mode & FULLSCREEN_GLOBAL) {
 		return cmd_results_new(CMD_FAILURE,
 				"Can't move fullscreen global container");
 	}

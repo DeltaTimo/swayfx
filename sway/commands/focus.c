@@ -141,7 +141,7 @@ static struct sway_node *node_get_in_direction_tiling(
 	struct sway_container *wrap_candidate = NULL;
 	struct sway_container *current = container;
 	while (current) {
-		if (current->pending.fullscreen_mode == FULLSCREEN_WORKSPACE) {
+		if (current->pending.fullscreen_mode & FULLSCREEN_WORKSPACE) {
 			// Fullscreen container with a direction - go straight to outputs
 			struct sway_output *output = current->pending.workspace->output;
 			struct sway_output *new_output =
@@ -151,7 +151,7 @@ static struct sway_node *node_get_in_direction_tiling(
 			}
 			return get_node_in_output_direction(new_output, dir);
 		}
-		if (current->pending.fullscreen_mode == FULLSCREEN_GLOBAL) {
+		if (current->pending.fullscreen_mode & FULLSCREEN_GLOBAL) {
 			return NULL;
 		}
 

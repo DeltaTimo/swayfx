@@ -143,7 +143,7 @@ list_t *node_get_children(struct sway_node *node) {
 
 bool node_has_ancestor(struct sway_node *node, struct sway_node *ancestor) {
 	if (ancestor->type == N_ROOT && node->type == N_CONTAINER &&
-			node->sway_container->pending.fullscreen_mode == FULLSCREEN_GLOBAL) {
+			node->sway_container->pending.fullscreen_mode & FULLSCREEN_GLOBAL) {
 		return true;
 	}
 	struct sway_node *parent = node_get_parent(node);
@@ -152,7 +152,7 @@ bool node_has_ancestor(struct sway_node *node, struct sway_node *ancestor) {
 			return true;
 		}
 		if (ancestor->type == N_ROOT && parent->type == N_CONTAINER &&
-				parent->sway_container->pending.fullscreen_mode == FULLSCREEN_GLOBAL) {
+				parent->sway_container->pending.fullscreen_mode & FULLSCREEN_GLOBAL) {
 			return true;
 		}
 		parent = node_get_parent(parent);
