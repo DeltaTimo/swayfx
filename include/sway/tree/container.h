@@ -125,6 +125,8 @@ struct sway_container {
 	
 	float dim;
 
+	bool inhibited_fullscreen;
+
 	struct wlr_texture *title_focused;
 	struct wlr_texture *title_focused_inactive;
 	struct wlr_texture *title_focused_tab_title;

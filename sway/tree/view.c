@@ -684,6 +684,10 @@ static void handle_foreign_fullscreen_request(
 		}
 	}
 
+	if (container->inhibited_fullscreen) {
+		return;
+	}
+
 	if (event->fullscreen && event->output && event->output->data) {
 		struct sway_output *output = event->output->data;
 		struct sway_workspace *ws = output_get_active_workspace(output);

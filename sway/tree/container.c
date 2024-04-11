@@ -45,6 +45,7 @@ struct sway_container *container_create(struct sway_view *view) {
 	c->shadow_enabled = config->shadow_enabled;
 	c->blur_enabled = config->blur_enabled;
 	c->corner_radius = config->corner_radius;
+	c->inhibited_fullscreen = false;
 
 	if (!view) {
 		c->pending.children = create_list();
