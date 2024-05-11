@@ -95,6 +95,14 @@ struct sway_drag {
 	struct wl_listener destroy;
 };
 
+struct mouse_antistutter {
+	uint32_t released_time;
+	struct wlr_input_device *device;
+	uint32_t delay;
+	uint32_t button;
+	struct wl_event_source *timer;
+};
+
 struct sway_seat {
 	struct wlr_seat *wlr_seat;
 	struct sway_cursor *cursor;
@@ -140,6 +148,9 @@ struct sway_seat {
 				// sway_keyboard_shortcuts_inhibitor::link
 
 	struct wl_list link; // input_manager::seats
+
+	struct mouse_antistutter mouse_antistutter1;
+	struct mouse_antistutter mouse_antistutter2;
 };
 
 struct sway_pointer_constraint {
@@ -383,5 +394,8 @@ keyboard_shortcuts_inhibitor_get_for_surface(const struct sway_seat *seat,
  */
 struct sway_keyboard_shortcuts_inhibitor *
 keyboard_shortcuts_inhibitor_get_for_focused_surface(const struct sway_seat *seat);
+
+void mouse_antistutter_release_later(struct sway_seat *seat, struct mouse_antistutter *stutter, struct wlr_input_device *device, uint32_t time_msec);
+void mouse_antistutter_stop_release_later(struct sway_seat *seat, struct mouse_antistutter *stutter);
 
 #endif

@@ -434,6 +434,30 @@ void dispatch_cursor_button(struct sway_cursor *cursor,
 		time_msec = get_current_time_msec();
 	}
 
+	/* Button press fixes */
+	struct mouse_antistutter *stutter = 0;
+	if (button == 272) {
+		stutter = &cursor->seat->mouse_antistutter1;
+	} else if (button == 273) {
+		stutter = &cursor->seat->mouse_antistutter2;
+	}
+	if (stutter != 0) {
+		/* Stutter prevention behaviour */
+		if (state == WLR_BUTTON_RELEASED) {
+			mouse_antistutter_release_later(cursor->seat, stutter, device, time_msec);
+			/* sway_log(SWAY_ERROR, "RELEASING LATER. time_msec %u, button %u, pressed %d", time_msec, button, state == WLR_BUTTON_PRESSED ? 1 : 0); */
+			return;
+		} else if (state == WLR_BUTTON_PRESSED) {
+			if (stutter->released_time != 0) {
+				/* sway_log(SWAY_ERROR, "REPRESS IGNORED. time_msec %u, button %u, pressed %d", time_msec, button, state == WLR_BUTTON_PRESSED ? 1 : 0); */
+				mouse_antistutter_stop_release_later(cursor->seat, stutter);
+				return;
+			}
+		}
+	}
+
+	/* sway_log(SWAY_ERROR, "time_msec %u, button %u, pressed %d", time_msec, button, state == WLR_BUTTON_PRESSED ? 1 : 0); */
+
 	seatop_button(cursor->seat, time_msec, device, button, state);
 }
 

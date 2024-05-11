@@ -547,6 +547,37 @@ static void collect_focus_container_iter(struct sway_container *container,
 	collect_focus_iter(&container->node, data);
 }
 
+static inline void mouse_antistutter_do_release(struct sway_seat *seat, struct mouse_antistutter *stutter) {
+	seatop_button(seat, stutter->released_time + stutter->delay, stutter->device, stutter->button, WLR_BUTTON_RELEASED);
+	/* sway_log(SWAY_ERROR, "FINALLY RELEASING. time_msec %u, button %u", stutter->released_time + stutter->delay, stutter->button); */
+	stutter->released_time = 0;
+	stutter->device = 0;
+}
+
+void mouse_antistutter_stop_release_later(struct sway_seat *seat, struct mouse_antistutter *stutter) {
+	wl_event_source_timer_update(stutter->timer, 0);
+	stutter->released_time = 0;
+	stutter->device = 0;
+}
+
+void mouse_antistutter_release_later(struct sway_seat *seat, struct mouse_antistutter *stutter, struct wlr_input_device *device, uint32_t time_msec) {
+	stutter->released_time = time_msec;
+	stutter->device = device;
+	wl_event_source_timer_update(stutter->timer, stutter->delay);
+}
+
+static int mouse_antistutter_do_release1(void* data) {
+	struct sway_seat *seat = data;
+	mouse_antistutter_do_release(seat, &seat->mouse_antistutter1);
+	return 1;
+}
+
+static int mouse_antistutter_do_release2(void* data) {
+	struct sway_seat *seat = data;
+	mouse_antistutter_do_release(seat, &seat->mouse_antistutter2);
+	return 1;
+}
+
 struct sway_seat *seat_create(const char *seat_name) {
 	struct sway_seat *seat = calloc(1, sizeof(struct sway_seat));
 	if (!seat) {
@@ -606,6 +637,18 @@ struct sway_seat *seat_create(const char *seat_name) {
 
 	wl_list_init(&seat->keyboard_groups);
 	wl_list_init(&seat->keyboard_shortcuts_inhibitors);
+
+	seat->mouse_antistutter1.released_time = 0;
+	seat->mouse_antistutter1.device = 0;
+	seat->mouse_antistutter1.delay = 10;
+	seat->mouse_antistutter1.button = 272;
+	seat->mouse_antistutter1.timer = wl_event_loop_add_timer(server.wl_event_loop, &mouse_antistutter_do_release1, seat);
+
+	seat->mouse_antistutter2.released_time = 0;
+	seat->mouse_antistutter2.device = 0;
+	seat->mouse_antistutter2.delay = 10;
+	seat->mouse_antistutter2.button = 273;
+	seat->mouse_antistutter2.timer = wl_event_loop_add_timer(server.wl_event_loop, &mouse_antistutter_do_release2, seat);
 
 	sway_input_method_relay_init(seat, &seat->im_relay);
 
