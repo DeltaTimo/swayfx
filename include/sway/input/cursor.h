@@ -15,6 +15,14 @@
 #define SWAY_SCROLL_LEFT KEY_MAX + 3
 #define SWAY_SCROLL_RIGHT KEY_MAX + 4
 
+struct sway_faulty_mouse_workaround {
+	uint32_t released_time;
+	struct wlr_input_device *device;
+	uint32_t delay;
+	uint32_t button;
+	struct wl_event_source *timer;
+};
+
 struct sway_cursor {
 	struct sway_seat *seat;
 	struct wlr_cursor *cursor;
@@ -80,6 +88,9 @@ struct sway_cursor {
 	enum seat_config_hide_cursor_when_typing hide_when_typing;
 
 	size_t pressed_button_count;
+
+	struct sway_faulty_mouse_workaround faulty_mouse_workaround_left;
+	struct sway_faulty_mouse_workaround faulty_mouse_workaround_right;
 };
 
 struct sway_node;
@@ -146,5 +157,8 @@ uint32_t get_mouse_button(const char *name, char **error);
 const char *get_mouse_button_name(uint32_t button);
 
 void handle_request_set_cursor_shape(struct wl_listener *listener, void *data);
+
+int faulty_mouse_workaround_do_release_left(void* data);
+int faulty_mouse_workaround_do_release_right(void* data);
 
 #endif

@@ -168,6 +168,9 @@ struct input_config {
 	int tap;
 	int tap_button_map;
 
+	int faulty_mouse_workaround_delay_left;
+	int faulty_mouse_workaround_delay_right;
+
 	char *xkb_layout;
 	char *xkb_model;
 	char *xkb_options;

@@ -44,6 +44,8 @@ struct input_config *new_input_config(const char* identifier) {
 	input->xkb_capslock = INT_MIN;
 	input->xkb_file_is_set = false;
 	input->tools = create_list();
+	input->faulty_mouse_workaround_delay_left = 0;
+	input->faulty_mouse_workaround_delay_right = 0;
 
 	return input;
 }
@@ -90,6 +92,12 @@ void merge_input_config(struct input_config *dst, struct input_config *src) {
 	}
 	if (src->repeat_rate != INT_MIN) {
 		dst->repeat_rate = src->repeat_rate;
+	}
+	if (src->faulty_mouse_workaround_delay_left != 0) {
+		dst->faulty_mouse_workaround_delay_left = src->faulty_mouse_workaround_delay_left;
+	}
+	if (src->faulty_mouse_workaround_delay_right != 0) {
+		dst->faulty_mouse_workaround_delay_right = src->faulty_mouse_workaround_delay_right;
 	}
 	if (src->scroll_method != INT_MIN) {
 		dst->scroll_method = src->scroll_method;

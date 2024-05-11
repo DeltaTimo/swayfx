@@ -283,6 +283,7 @@ sway_cmd input_cmd_drag_lock;
 sway_cmd input_cmd_dwt;
 sway_cmd input_cmd_dwtp;
 sway_cmd input_cmd_events;
+sway_cmd input_cmd_faulty_mouse_workaround;
 sway_cmd input_cmd_left_handed;
 sway_cmd input_cmd_map_from_region;
 sway_cmd input_cmd_map_to_output;

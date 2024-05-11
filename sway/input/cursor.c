@@ -427,12 +427,84 @@ static void handle_pointer_motion_absolute(
 		dx, dy);
 }
 
+void faulty_mouse_workaround_do_release(struct sway_cursor *cursor, struct sway_faulty_mouse_workaround *workaround) {
+	seatop_button(cursor->seat, workaround->released_time + workaround->delay, workaround->device, workaround->button, WLR_BUTTON_RELEASED);
+	/* sway_log(SWAY_ERROR, "FINALLY RELEASING. time_msec %u, button %u", workaround->released_time + workaround->delay, workaround->button); */
+	workaround->released_time = 0;
+	workaround->device = 0;
+}
+
+void faulty_mouse_workaround_stop_release_later(struct sway_cursor *cursor, struct sway_faulty_mouse_workaround *workaround) {
+	wl_event_source_timer_update(workaround->timer, 0);
+	workaround->released_time = 0;
+	workaround->device = 0;
+}
+
+void faulty_mouse_workaround_release_later(struct sway_cursor *cursor, struct sway_faulty_mouse_workaround *workaround, struct wlr_input_device *device, uint32_t time_msec, uint32_t delay) {
+	workaround->released_time = time_msec;
+	workaround->device = device;
+	wl_event_source_timer_update(workaround->timer, delay);
+}
+
+int faulty_mouse_workaround_do_release_left(void* data) {
+	struct sway_cursor *cursor = data;
+	faulty_mouse_workaround_do_release(cursor, &cursor->faulty_mouse_workaround_left);
+	return 1;
+}
+
+int faulty_mouse_workaround_do_release_right(void* data) {
+	struct sway_cursor *cursor = data;
+	faulty_mouse_workaround_do_release(cursor, &cursor->faulty_mouse_workaround_right);
+	return 1;
+}
+
 void dispatch_cursor_button(struct sway_cursor *cursor,
 		struct wlr_input_device *device, uint32_t time_msec, uint32_t button,
 		enum wlr_button_state state) {
 	if (time_msec == 0) {
 		time_msec = get_current_time_msec();
 	}
+
+	/* Button press fixes */
+	struct sway_input_device *sway_device = NULL;
+	struct sway_input_device *sway_device_i = NULL;
+	/* Get sway device. */
+	wl_list_for_each(sway_device_i, &server.input->devices, link) {
+		if (sway_device_i->wlr_device == device) {
+			sway_device = sway_device_i;
+			break;
+		}
+	}
+
+	if (sway_device != NULL) {
+		struct input_config *ic = input_device_get_config(sway_device);
+		if (ic != NULL) {
+			struct sway_faulty_mouse_workaround *workaround = NULL;
+			int *delay = NULL;
+			if (button == 272) {
+				workaround = &cursor->faulty_mouse_workaround_left;
+				delay = &ic->faulty_mouse_workaround_delay_left;
+			} else if (button == 273) {
+				workaround = &cursor->faulty_mouse_workaround_right;
+				delay = &ic->faulty_mouse_workaround_delay_right;
+			}
+			if (workaround != NULL && delay != NULL) {
+				if (state == WLR_BUTTON_RELEASED && *delay != 0) {
+					faulty_mouse_workaround_release_later(cursor, workaround, device, time_msec, *delay);
+					/* sway_log(SWAY_ERROR, "RELEASING LATER. time_msec %u, button %u, pressed %d", time_msec, button, state == WLR_BUTTON_PRESSED ? 1 : 0); */
+					return;
+				} else if (state == WLR_BUTTON_PRESSED) {
+					if (workaround->released_time != 0) {
+						/* sway_log(SWAY_ERROR, "REPRESS IGNORED. time_msec %u, button %u, pressed %d", time_msec, button, state == WLR_BUTTON_PRESSED ? 1 : 0); */
+						faulty_mouse_workaround_stop_release_later(cursor, workaround);
+						return;
+					}
+				}
+			}
+		}
+	}
+
+	/* sway_log(SWAY_ERROR, "time_msec %u, button %u, pressed %d", time_msec, button, state == WLR_BUTTON_PRESSED ? 1 : 0); */
 
 	seatop_button(cursor->seat, time_msec, device, button, state);
 }
@@ -1229,6 +1301,18 @@ struct sway_cursor *sway_cursor_create(struct sway_seat *seat) {
 	wl_list_init(&cursor->tablet_pads);
 
 	cursor->cursor = wlr_cursor;
+
+	cursor->faulty_mouse_workaround_left.released_time = 0;
+	cursor->faulty_mouse_workaround_left.device = 0;
+	cursor->faulty_mouse_workaround_left.delay = 1000;
+	cursor->faulty_mouse_workaround_left.button = 272;
+	cursor->faulty_mouse_workaround_left.timer = wl_event_loop_add_timer(server.wl_event_loop, &faulty_mouse_workaround_do_release_left, cursor);
+
+	cursor->faulty_mouse_workaround_right.released_time = 0;
+	cursor->faulty_mouse_workaround_right.device = 0;
+	cursor->faulty_mouse_workaround_right.delay = 1000;
+	cursor->faulty_mouse_workaround_right.button = 273;
+	cursor->faulty_mouse_workaround_right.timer = wl_event_loop_add_timer(server.wl_event_loop, &faulty_mouse_workaround_do_release_right, cursor);
 
 	return cursor;
 }

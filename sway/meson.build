@@ -184,6 +184,7 @@ sway_sources = files(
 	'commands/input/dwt.c',
 	'commands/input/dwtp.c',
 	'commands/input/events.c',
+	'commands/input/faulty_mouse_workaround.c',
 	'commands/input/left_handed.c',
 	'commands/input/map_from_region.c',
 	'commands/input/map_to_output.c',
