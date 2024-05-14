@@ -78,6 +78,12 @@ supported. *For all replies, any properties not listed are subject to removal.*
 |- 12
 :  GET_BINDING_STATE
 :  Request the current binding state, e.g. the currently active binding mode name.
+|- 13
+:  GET_CURRENT_BINDS
+:  Request the current bindings.
+|- 14
+:  GET_BINDS
+:  Request all bindings.
 |- 100
 :  GET_INPUTS
 :  Get the list of input devices
@@ -1128,6 +1134,64 @@ currently active binding mode as a string.
 ```
 {
 	"name": "default"
+}
+```
+
+## 13. GET_CURRENT_BINDS
+
+*MESSAGE*++
+Returns the current bindings.
+
+*REPLY*++
+An array of objects for each binding. Each object has the following
+properties:
+
+[- *PROPERTY*
+:- *DATA TYPE*
+:- *DESCRIPTION*
+|- type
+:  string
+:  The type of the binding. Currently, this can be _"KEYCODE"_, _"KEYSYM"_,
+   _"MOUSECODE"_, _"MOUSESYM"_, _"SWITCH"_, _"GESTURE"_, _"OTHER"_.
+|- order
+:  integer
+:  The order of the binding
+|- input
+:  string
+:  The input device the binding is for
+|- flags
+:  int
+:  The bitmask flags of the binding. This corresponds to the enum _binding_flags_.
+|- keys
+:  array
+:  The list of keycodes (_int_) of the binding
+|- syms
+:  array
+:  The list of keynames (_string_) of the binding
+|- modifiers
+:  int
+:  The bitmask modifiers of the binding
+|- group
+:  integer
+:  The XKB layout group the binding is for
+|- command
+:  string
+:  The command this binding executes.
+
+
+## 14. GET_BINDS
+
+*MESSAGE*++
+Returns all registered bindings.
+
+*REPLY*++
+An object mapping each mode to a list of bindings. The bindings follow the
+structure as in _GET_CURRENT_BINDS_.
+
+*Example Reply:*
+```
+{
+	"default": [],
 }
 ```
 

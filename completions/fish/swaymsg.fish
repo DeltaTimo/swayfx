@@ -19,6 +19,8 @@ complete -c swaymsg -s t -l type -fra 'get_bar_config' --description "Get a JSON
 complete -c swaymsg -s t -l type -fra 'get_version' --description "Get JSON-encoded version information for the running instance of sway."
 complete -c swaymsg -s t -l type -fra 'get_binding_modes' --description "Gets a JSON-encoded list of currently configured binding modes."
 complete -c swaymsg -s t -l type -fra 'get_binding_state' --description "Get JSON-encoded info about the current binding state."
+complete -c swaymsg -s t -l type -fra 'get_current_binds' --description "Get JSON-encoded info about the current bindings"
+complete -c swaymsg -s t -l type -fra 'get_binds' --description "Get JSON-encoded info about all registered bindings"
 complete -c swaymsg -s t -l type -fra 'get_config' --description "Gets a JSON-encoded copy of the current configuration."
 complete -c swaymsg -s t -l type -fra 'get_seats' --description "Gets a JSON-encoded list of all seats, its properties and all assigned devices."
 complete -c swaymsg -s t -l type -fra 'send_tick' --description "Sends a tick event to all subscribed clients."

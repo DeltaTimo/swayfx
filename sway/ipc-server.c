@@ -899,6 +899,31 @@ void ipc_client_handle_command(struct ipc_client *client, uint32_t payload_lengt
 		goto exit_cleanup;
 	}
 
+	case IPC_GET_CURRENT_BINDS:
+	{
+		json_object *binds = ipc_json_get_bindings(config->current_mode);
+		const char *json_string = json_object_to_json_string(binds);
+		ipc_send_reply(client, payload_type, json_string,
+			(uint32_t)strlen(json_string));
+		json_object_put(binds); // free
+		goto exit_cleanup;
+	}
+
+	case IPC_GET_BINDS:
+	{
+		json_object *modes = json_object_new_object();
+		for (int i = 0; i < config->modes->length; i++) {
+			struct sway_mode *mode = config->modes->items[i];
+			json_object *binds = ipc_json_get_bindings(mode);
+			json_object_object_add(modes, mode->name, binds);
+		}
+		const char *json_string = json_object_to_json_string(modes);
+		ipc_send_reply(client, payload_type, json_string,
+			(uint32_t)strlen(json_string));
+		json_object_put(modes); // free
+		goto exit_cleanup;
+	}
+
 	case IPC_GET_CONFIG:
 	{
 		json_object *json = json_object_new_object();

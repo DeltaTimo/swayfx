@@ -17,6 +17,8 @@ _swaymsg()
     'get_binding_modes'
     'get_binding_state'
     'get_config'
+    'get_current_binds'
+    'get_binds'
     'send_tick'
     'subscribe'
   )

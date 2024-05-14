@@ -522,6 +522,10 @@ int main(int argc, char **argv) {
 		type = IPC_GET_BINDING_MODES;
 	} else if (strcasecmp(cmdtype, "get_binding_state") == 0) {
 		type = IPC_GET_BINDING_STATE;
+	} else if (strcasecmp(cmdtype, "get_current_binds") == 0) {
+		type = IPC_GET_CURRENT_BINDS;
+	} else if (strcasecmp(cmdtype, "get_binds") == 0) {
+		type = IPC_GET_BINDS;
 	} else if (strcasecmp(cmdtype, "get_config") == 0) {
 		type = IPC_GET_CONFIG;
 	} else if (strcasecmp(cmdtype, "send_tick") == 0) {
