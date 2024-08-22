@@ -484,9 +484,11 @@ static void handle_key_event(struct sway_keyboard *keyboard,
 		sway_keyboard_disarm_key_repeat(keyboard);
 	}
 
+	bool do_consume = false;
 	if (binding) {
 		seat_execute_command(seat, binding);
 		handled = true;
+		do_consume = binding->flags & ~BINDING_NOCONSUME;
 	}
 
 	if (!handled && keyboard->wlr->group) {
@@ -521,7 +523,7 @@ static void handle_key_event(struct sway_keyboard *keyboard,
 		}
 	}
 
-	if (!handled) {
+	if (!handled || !do_consume) {
 		struct wlr_input_method_keyboard_grab_v2 *kb_grab = keyboard_get_im_grab(keyboard);
 
 		if (kb_grab) {
@@ -532,7 +534,7 @@ static void handle_key_event(struct sway_keyboard *keyboard,
 		}
 	}
 
-	if (!handled && event->state != WL_KEYBOARD_KEY_STATE_RELEASED) {
+	if ((!handled || !do_consume) && event->state != WL_KEYBOARD_KEY_STATE_RELEASED) {
 		// If a released event failed pressed sent test, and not in sent to
 		// keyboard grab, it is still not handled. Don't handle released here.
 		update_shortcut_state(

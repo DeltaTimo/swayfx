@@ -377,6 +377,8 @@ static struct cmd_results *cmd_bindsym_or_bindcode(int argc, char **argv,
 			warn = false;
 		} else if (strcmp("--no-repeat", argv[0]) == 0) {
 			binding->flags |= BINDING_NOREPEAT;
+		} else if (strcmp("--no-consume", argv[0]) == 0) {
+			binding->flags |= BINDING_NOCONSUME;
 		} else {
 			break;
 		}
@@ -489,6 +491,7 @@ static struct cmd_results *cmd_bindsym_or_bindcode(int argc, char **argv,
 
 	binding->command = join_args(argv + 1, argc - 1);
 	binding->order = binding_order++;
+
 	return binding_add(binding, mode_bindings, bindtype, argv[0], warn);
 }
 
